@@ -1,0 +1,309 @@
+
+# coding: utf-8
+
+# In[81]:
+
+import numpy as np
+from math import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import *
+
+
+# In[82]:
+
+# -GradV = F
+def Fx(m,x,y): 
+    return (-x-2*x*y)/m
+
+def Fy(m,x,y):
+    return (-y -x**2 + y**2)/m
+
+#Hamiltoniana
+def H(vx,vy,x,y):
+    return 0.5*(vx**2 + vy**2 + x**2 + y**2) + (x**2)*y -(y**3)/3
+
+#Potencial
+
+def V(x,y):
+    return 0.5*(x**2 + y**2) + y*(x**2) - (y**3)/3
+
+def Vp(r,theta): #V=V(r,theta)
+    return (1/2)*r**2 + (np.sin(theta)*(np.cos(theta)**2) - (1/3)*np.sin(theta)**3)*r**3
+
+
+# In[84]:
+
+# H para K = 0, formando surperficies equipotenciais
+
+N = 20000
+h = 0.05
+yl = np.linspace(-1.5,1.5,N)
+z = list(range(N))
+c = [i* .4/20 for i in range(1,20)]
+
+def xl(y,c): return (c + 1/3*yl**3 - 1/2*yl**2)/(1/2 + yl)
+
+fig = plt.figure()
+for hl in c:
+    if (hl <= 0.16):
+        plt.plot(np.sqrt(xl(yl,hl)),yl,'r-')
+        plt.plot(-np.sqrt(xl(yl,hl)),yl,'r-')
+    else:
+        plt.plot(np.sqrt(xl(yl,hl)),yl,'k-')
+        plt.plot(-np.sqrt(xl(yl,hl)),yl,'k-')
+plt.axis([-1.0,1.0,-1.0,1.0])
+plt.show()
+
+
+# In[85]:
+
+k1vx = list(range(N))
+k1vy = list(range(N))
+k1x = list(range(N))
+k1y = list(range(N))
+
+k2vx = list(range(N))
+k2vy = list(range(N))
+k2x = list(range(N))
+k2y = list(range(N))
+
+k3vx = list(range(N))
+k3vy = list(range(N))
+k3x = list(range(N)) 
+k3y = list(range(N))
+
+k4vx = list(range(N))
+k4vy = list(range(N))
+k4x = list(range(N))
+k4y = list(range(N))
+
+vx = list(range(N))
+vy = list(range(N))
+x = list(range(N))
+y = list(range(N))
+r = list(range(N))
+th = list(range(N))
+vr = list(range(N))
+vth = list(range(N))
+
+
+# In[ ]:
+
+d = np.linspace(0,0.5,50)
+f = np.linspace(0,2,50)
+
+for i in range(0,len(d)-1):
+    r[0] = d[i]
+   
+    for j in range(0,len(f)-1):
+        th[0] = f[j]*pi
+        vr[0] = 0
+        if (r[0] == 0):
+            break       
+        aux = (2*0.17 -2*(r[0]**3)*np.sin(th[0])*(np.cos(th[0]))**2 - 2/3*(r[0]**3)*(sin(th[0]))**3 - r[0]**2)/(r[0]**2)
+        if(aux < 0):
+            continue
+            
+        vth[0] = np.sqrt(aux) 
+        x[0] = r[0]*np.cos(th[0])
+        y[0] = r[0]*np.sin(th[0])
+        vx[0] = -r[0]*np.sin(th[0])*vth[0]
+        vy[0] = r[0]*np.cos(th[0])*vth[0]
+       
+        for k in range(0,N-1):
+            vr[k] = 0
+            k1vx[k] = 0
+            k1vy[k] = 0
+            k1x[k] = 0
+            k1y[k] = 0
+            k2vx[k] = 0
+            k2vy[k] = 0
+            k2x[k] = 0
+            k2y[k] = 0
+            k3vx[k] = 0
+            k3vy[k] = 0
+            k3x[k] = 0
+            k3y[k] = 0
+            k4vx[k] = 0
+            k4vy[k] = 0
+            k4x[k] = 0
+            k4y[k] = 0
+            
+            k1vx[k] = Fx(1,x[k],y[k])
+            k1vy[k] = Fy(1,x[k],y[k])
+            k1x[k] = vx[k]
+            k1y[k] = vy[k]
+        
+            k2vx[k] = Fx(1,x[k]+k1x[k]*h/2,y[k]+k1y[k]*h/2) 
+            k2vy[k] = Fy(1,x[k]+k1x[k]*h/2,y[k]+k1y[k]*h/2)
+            k2x[k] = (vx[k] + k1vx[k]*h/2)
+            k2y[k] = (vy[k] + k1vy[k]*h/2)
+    
+            k3vx[k] = Fx(1,x[k]+k2x[k]*h/2,y[k]+k2y[k]*h/2) 
+            k3vy[k] = Fy(1,x[k]+k2x[k]*h/2,y[k]+k2y[k]*h/2) 
+            k3x[k] = (vx[k] + k2vx[k]*h/2)
+            k3y[k] = (vy[k] + k2vy[k]*h/2)
+    
+            k4vx[k] = Fx(1,x[k]+k3x[k]*h,y[k]+k3y[k]*h) 
+            k4vy[k] = Fy(1,x[k]+k3x[k]*h,y[k]+k3y[k]*h)
+            k4x[k] = (vx[k] + k3vx[k]*h)
+            k4y[k] = (vy[k] + k3vy[k]*h)
+    
+            vx[k+1] = vx[k] + h/6*(k1vx[k] + 2*(k2vx[k] + k3vx[k]) + k4vx[k])
+            vy[k+1] = vy[k] + h/6*(k1vy[k] + 2*(k2vy[k] + k3vy[k]) + k4vy[k])
+            
+            if(x[k] > np.sqrt(3/4)):
+                x[k+1] = x[k]
+                
+            elif(x[k] < -np.sqrt(3/4)):
+                x[k+1] = x[k]
+                
+            else:    
+                x[k+1] = x[k] + h/6*(k1x[k] + 2*(k2x[k] + k3x[k]) + k4x[k])
+            
+            if(y[k] > 1):
+                y[k+1] = y[k]
+                
+            elif(y[k] < -0.5):
+                y[k+1] = y[k]
+                
+            else:
+                y[k+1] = y[k] + h/6*(k1y[k] + 2*(k2y[k] + k3y[k]) + k4y[k])    
+                
+        #print(x[0:150])
+        if (y[150] >= 1):
+            plt.plot(x[0],y[0],'g.')
+        elif(x[150] >= sqrt(3/4)):
+            plt.plot(x[0],y[0],'b.')
+        elif(x[150] <= -sqrt(3/4)):
+            plt.plot(x[0],y[0],'y.')
+        #else:
+        #    plt.plot(x[0],y[0],'r.')
+                                 
+plt.axis([-1.5,1.5,-1.5,1.5])
+plt.plot(np.sqrt(xl(yl,0.16)),yl,'k-')
+plt.plot(-np.sqrt(xl(yl,0.16)),yl,'k-')
+
+plt.show() 
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
+
+# In[90]:
+
+#vxl = list(range(N))
+#vyl = list(range(N))
+#d = np.linspace(-0.5,1.5,50)
+#f = np.linspace(-1,2,N)
+#g = [0.17,0.18,0.19,0.20,0.22,0.24,0.26,0.28,0.30]
+
+#for k in range(0,len(g)):
+#    e = g[k]
+#    for j in range(0,len(d)):
+#        x[0] = 0
+#        y[0] = d[j]
+#        vxl[0] = 2*(e+1/3*y[0]**3) - vy[0]**2 - y[0]**2
+#        vx[0] = vxl[0]**2
+#        vy[0] = d[j]
+#        for i in range(0,N-1):
+#            k1vx[i] = Fx(1,x[i],y[i])*h
+#            k1vy[i] = Fy(1,x[i],y[i])*h
+#            k1x[i] = vx[i]*h
+#            k1y[i] = vy[i]*h
+#        
+#            k2vx[i] = Fx(1,x[i]+k1x[i]/2,y[i]+k1y[i]/2)*h 
+#            k2vy[i] = Fy(1,x[i]+k1x[i]/2,y[i]+k1y[i]/2)*h
+#            k2x[i] = (vx[i] + k1vx[i]/2)*h
+#            k2y[i] = (vy[i] + k1vy[i]/2)*h
+#    
+#            k3vx[i] = Fx(1,x[i]+k2x[i]/2,y[i]+k2y[i]/2)*h 
+#            k3vy[i] = Fy(1,x[i]+k2x[i]/2,y[i]+k2y[i]/2)*h 
+#            k3x[i] = (vx[i] + k2vx[i]/2)*h 
+#            k3y[i] = (vy[i] + k2vy[i]/2)*h
+#    
+#            k4vx[i] = Fx(1,x[i]+k3x[i],y[i]+k3y[i])*h 
+#            k4vy[i] = Fy(1,x[i]+k3x[i],y[i]+k3y[i])*h 
+#            k4x[i] = (vx[i] + k3vx[i])*h
+#            k4y[i] = (vy[i] + k3vy[i])*h
+#    
+#            vx[i+1] = vx[i] + 1/6*(k1vx[i] + 2*(k2vx[i] + k3vx[i]) + k4vx[i])
+#            vy[i+1] = vy[i] + 1/6*(k1vy[i] + 2*(k2vy[i] + k3vy[i]) + k4vy[i])
+#    
+#            x[i+1] = x[i] + 1/6*(k1x[i] + 2*(k2x[i] + k3x[i]) + k4x[i])
+#            y[i+1] = y[i] + 1/6*(k1y[i] + 2*(k2y[i] + k3y[i]) + k4y[i])
+#            yl[i] = f[i]
+#            vyl[i] = 2*(h-V(0,yl[i]))
+#        plt.plot(y,vy)
+#    plt.plot(yl,np.sqrt(vyl))
+#    plt.plot(y,-np.sqrt(vyl))
+#    plt.axis([-0.5,1.5,-1,1])
+#    plt.show()
+
+
+# In[91]:
+
+#vyl = list(range(N))
+#d = np.linspace(-0.5,1.5,50)
+#f = np.ones(N)
+#g = np.linspace(1/6,0.4,N)
+
+#for k in range(0,len(g)):
+#    e = g[k]
+#    for j in range(0,len(d)):
+#        x[0] = d[j]
+#        y[0] = 0
+#        vx[0] = 0
+#        vyl[0] = 2*e - x[0]**2
+#        vy[0] = np.sqrt(vyl[0])
+#        for i in range(0,N-1):
+#            f[i] = e*f[i]
+#            k1vx[i] = Fx(1,x[i],y[i])*h
+#            k1vy[i] = Fy(1,x[i],y[i])*h
+#            k1x[i] = vx[i]*h
+#            k1y[i] = vy[i]*h
+#        
+#            k2vx[i] = Fx(1,x[i]+k1x[i]/2,y[i]+k1y[i]/2)*h 
+#            k2vy[i] = Fy(1,x[i]+k1x[i]/2,y[i]+k1y[i]/2)*h
+#            k2x[i] = (vx[i] + k1vx[i]/2)*h
+#            k2y[i] = (vy[i] + k1vy[i]/2)*h
+#    
+#            k3vx[i] = Fx(1,x[i]+k2x[i]/2,y[i]+k2y[i]/2)*h 
+#            k3vy[i] = Fy(1,x[i]+k2x[i]/2,y[i]+k2y[i]/2)*h 
+#            k3x[i] = (vx[i] + k2vx[i]/2)*h 
+#            k3y[i] = (vy[i] + k2vy[i]/2)*h
+#    
+#            k4vx[i] = Fx(1,x[i]+k3x[i],y[i]+k3y[i])*h 
+#            k4vy[i] = Fy(1,x[i]+k3x[i],y[i]+k3y[i])*h 
+#            k4x[i] = (vx[i] + k3vx[i])*h
+#            k4y[i] = (vy[i] + k3vy[i])*h
+#    
+#            #vx[i+1] = vx[i] + 1/6*(k1vx[i] + 2*(k2vx[i] + k3vx[i]) + k4vx[i])
+#            vx[i+1] = vx[i]
+#            vy[i+1] = vy[i] + 1/6*(k1vy[i] + 2*(k2vy[i] + k3vy[i]) + k4vy[i])
+#    
+#            x[i+1] = x[i] + 1/6*(k1x[i] + 2*(k2x[i] + k3x[i]) + k4x[i])
+#            #y[i+1] = y[i] + 1/6*(k1y[i] + 2*(k2y[i] + k3y[i]) + k4y[i])
+#            y[i+1] = y[i]
+#        plt.plot(x,f)
+#    plt.plot    
+#    plt.axis([-0.5,0.5,-1,0.4])
+#plt.show()
+
+
+# In[ ]:
+
+
+
